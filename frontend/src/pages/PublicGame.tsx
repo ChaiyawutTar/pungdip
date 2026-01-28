@@ -4,18 +4,17 @@ import { PrizeModal } from '../components/PrizeModal';
 import { useSpin } from '../hooks/useSpin';
 import type { SpinResult } from '../types';
 
-// Prize wheel segments
+// Prize wheel segments - 6 segments
 const WHEEL_SEGMENTS = [
-    { id: 'MK_DUCK', label: 'บัตร MK', color: '#FFD700', emoji: '🦆' },
-    { id: 'STARBUCKS', label: 'Starbucks', color: '#00704A', emoji: '☕' },
+    { id: 'MK_DUCK', label: 'บัตรเป็ด MK', color: '#FFD700', emoji: '🦆' },
+    { id: 'STARBUCKS', label: 'Starbucks 1000฿', color: '#00704A', emoji: '☕' },
     { id: 'DISCOUNT_10', label: 'ลด 10%', color: '#FF6B6B', emoji: '🎫' },
     { id: 'DISCOUNT_05', label: 'ลด 5%', color: '#4ECDC4', emoji: '🏷️' },
-    { id: 'NOTHING', label: 'เสียใจด้วย', color: '#95A5A6', emoji: '😢' },
-    { id: 'NOTHING2', label: 'ลองใหม่', color: '#BDC3C7', emoji: '🍀' },
+    { id: 'NOTHING', label: 'ไม่ได้อะไรเลย', color: '#95A5A6', emoji: '😢' },
+    { id: 'GIVE_IG', label: 'แจก IG', color: '#E1306C', emoji: '📱' },
 ];
 
 export const PublicGame = () => {
-    const [igAccount, setIgAccount] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [prizeResult, setPrizeResult] = useState<SpinResult | null>(null);
     const [wheelRotation, setWheelRotation] = useState(0);
@@ -24,21 +23,18 @@ export const PublicGame = () => {
     const spinMutation = useSpin();
 
     const handleSpin = async () => {
-        if (!igAccount.trim()) {
-            alert('กรุณากรอก IG Account');
-            return;
-        }
+        if (isWheelSpinning) return;
 
         try {
             // Start spinning animation
             setIsWheelSpinning(true);
 
-            // Call API
-            const result = await spinMutation.mutateAsync(igAccount.trim());
+            // Call API (pass empty string since IG not required)
+            const result = await spinMutation.mutateAsync('');
 
             // Calculate target rotation based on result
             const prizeIndex = WHEEL_SEGMENTS.findIndex(
-                p => result.result.startsWith(p.id.replace('2', ''))
+                p => result.result.startsWith(p.id.split('_')[0]) || result.result === p.id
             );
             const segmentAngle = 360 / WHEEL_SEGMENTS.length;
             const targetAngle = 360 * 6 + (360 - (prizeIndex * segmentAngle + segmentAngle / 2));
@@ -62,7 +58,6 @@ export const PublicGame = () => {
     const handleCloseModal = () => {
         setShowModal(false);
         setPrizeResult(null);
-        setIgAccount('');
     };
 
     return (
@@ -76,7 +71,7 @@ export const PublicGame = () => {
             {/* Main container */}
             <div className="text-center relative z-10 w-full max-w-lg">
                 {/* Logo */}
-                <div className="mb-6">
+                <div className="mb-8">
                     <h1 className="text-5xl md:text-6xl font-display font-bold text-pangdip-brown mb-2">
                         🥟 PANGDIP 🥟
                     </h1>
@@ -85,13 +80,14 @@ export const PublicGame = () => {
                     </p>
                 </div>
 
-                {/* Spinning Wheel */}
-                <div className="relative mb-6">
+                {/* Spinning Wheel - Centered */}
+                <div className="relative mb-8 flex justify-center">
                     {/* Pointer */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
                         <div
-                            className="w-0 h-0"
                             style={{
+                                width: 0,
+                                height: 0,
                                 borderLeft: '15px solid transparent',
                                 borderRight: '15px solid transparent',
                                 borderTop: '30px solid #4A2C2A',
@@ -102,7 +98,7 @@ export const PublicGame = () => {
 
                     {/* Wheel */}
                     <div
-                        className="w-72 h-72 md:w-80 md:h-80 mx-auto rounded-full relative overflow-hidden shadow-2xl"
+                        className="w-80 h-80 rounded-full relative shadow-2xl"
                         style={{
                             border: '8px solid #4A2C2A',
                             transform: `rotate(${wheelRotation}deg)`,
@@ -111,41 +107,51 @@ export const PublicGame = () => {
                     >
                         {/* Wheel segments using conic gradient */}
                         <div
-                            className="w-full h-full"
+                            className="w-full h-full rounded-full"
                             style={{
                                 background: `conic-gradient(
-                  ${WHEEL_SEGMENTS.map((seg, i) =>
+                                    ${WHEEL_SEGMENTS.map((seg, i) =>
                                     `${seg.color} ${i * (100 / 6)}% ${(i + 1) * (100 / 6)}%`
                                 ).join(', ')}
-                )`,
+                                )`,
                             }}
                         >
-                            {/* Labels */}
-                            {WHEEL_SEGMENTS.map((seg, i) => {
-                                const angle = (i * 60) + 30; // Center of each segment
-                                return (
-                                    <div
-                                        key={seg.id}
-                                        className="absolute text-white font-bold text-center"
-                                        style={{
-                                            top: '50%',
-                                            left: '50%',
-                                            width: '80px',
-                                            transform: `
-                        rotate(${angle}deg) 
-                        translateY(-110px) 
-                        rotate(90deg)
-                      `,
-                                            textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
-                                            fontSize: '11px',
-                                        }}
-                                    >
-                                        <span className="text-xl">{seg.emoji}</span>
-                                        <br />
-                                        {seg.label}
-                                    </div>
-                                );
-                            })}
+                            {/* Labels - using SVG for proper radial text */}
+                            <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full">
+                                {WHEEL_SEGMENTS.map((seg, i) => {
+                                    const angle = (i * 60) + 30; // Center of segment
+                                    const rad = (angle - 90) * (Math.PI / 180); // Convert to radians, offset to start from top
+                                    const radius = 110;
+                                    const x = 150 + Math.cos(rad) * radius;
+                                    const y = 150 + Math.sin(rad) * radius;
+
+                                    return (
+                                        <g key={seg.id} transform={`rotate(${angle}, ${x}, ${y})`}>
+                                            <text
+                                                x={x}
+                                                y={y - 10}
+                                                textAnchor="middle"
+                                                fill="white"
+                                                fontSize="24"
+                                                style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
+                                            >
+                                                {seg.emoji}
+                                            </text>
+                                            <text
+                                                x={x}
+                                                y={y + 12}
+                                                textAnchor="middle"
+                                                fill="white"
+                                                fontSize="11"
+                                                fontWeight="bold"
+                                                style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
+                                            >
+                                                {seg.label}
+                                            </text>
+                                        </g>
+                                    );
+                                })}
+                            </svg>
                         </div>
 
                         {/* Center circle */}
@@ -161,34 +167,18 @@ export const PublicGame = () => {
                     </div>
                 </div>
 
-                {/* IG Input */}
-                <div className="card-warm p-6 mb-4">
-                    <label className="block text-pangdip-brown font-body text-left mb-2 ml-2">
-                        📱 Instagram Account
-                    </label>
-                    <input
-                        type="text"
-                        value={igAccount}
-                        onChange={(e) => setIgAccount(e.target.value)}
-                        placeholder="yourname"
-                        className="input-warm"
-                        disabled={isWheelSpinning}
-                        onKeyDown={(e) => e.key === 'Enter' && !isWheelSpinning && handleSpin()}
-                    />
-                </div>
-
                 {/* Spin Button */}
-                <div className="flex justify-center">
+                <div className="flex justify-center mb-4">
                     <SpinButton
                         onClick={handleSpin}
                         isLoading={isWheelSpinning}
-                        disabled={!igAccount.trim() || isWheelSpinning}
+                        disabled={isWheelSpinning}
                     />
                 </div>
 
-                {/* Terms */}
-                <p className="mt-4 text-sm text-pangdip-brown/50 font-body">
-                    กรอก IG แล้วกดหมุนลุ้นรางวัล! 🎉
+                {/* Instructions */}
+                <p className="text-sm text-pangdip-brown/60 font-body">
+                    กดหมุนลุ้นรางวัล! 🎉
                 </p>
             </div>
 

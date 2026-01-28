@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import type { PrizeModalProps } from '../types';
-import { PRIZE_DISPLAY } from '../types';
+
+// Thai prize display info
+const PRIZE_INFO: Record<string, { emoji: string; name: string; isWin: boolean; message?: string }> = {
+    MK_DUCK: { emoji: '🦆', name: 'บัตรเป็ด MK', isWin: true, message: 'กรุณาแคปหน้าจอนี้แสดงกับพนักงาน' },
+    STARBUCKS: { emoji: '☕', name: 'Starbucks 1,000 บาท', isWin: true, message: 'กรุณาแคปหน้าจอนี้แสดงกับพนักงาน' },
+    DISCOUNT_10: { emoji: '🎫', name: 'ส่วนลด 10%', isWin: true, message: 'กรุณาแคปหน้าจอนี้แสดงกับพนักงาน' },
+    DISCOUNT_05: { emoji: '🏷️', name: 'ส่วนลด 5%', isWin: true, message: 'กรุณาแคปหน้าจอนี้แสดงกับพนักงาน' },
+    GIVE_IG: { emoji: '📱', name: 'แจก IG ให้พี่ๆ', isWin: false, message: 'โปรดแจ้ง IG ให้พนักงานจดบันทึก' },
+    NOTHING: { emoji: '😢', name: 'ไม่ได้อะไรเลย', isWin: false },
+};
 
 export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
     const [showConfetti, setShowConfetti] = useState(false);
@@ -15,17 +24,7 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
 
     if (!isOpen || !prize) return null;
 
-    const prizeInfo = PRIZE_DISPLAY[prize.result] || { emoji: '🎁', color: 'text-pangdip-orange' };
-    const isWin = prize.result !== 'NOTHING';
-
-    // Thai prize names
-    const thaiPrizeNames: Record<string, string> = {
-        MK_DUCK: '🦆 บัตรเป็ด MK',
-        STARBUCKS: '☕ Starbucks 1,000 บาท',
-        DISCOUNT_10: '🎫 ส่วนลด 10%',
-        DISCOUNT_05: '🏷️ ส่วนลด 5%',
-        NOTHING: '😢 เสียใจด้วยนะ',
-    };
+    const info = PRIZE_INFO[prize.result] || { emoji: '🎁', name: prize.prize_name, isWin: false };
 
     return (
         <div className="modal-backdrop" onClick={onClose}>
@@ -34,7 +33,7 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Confetti effect */}
-                {showConfetti && isWin && (
+                {showConfetti && info.isWin && (
                     <div className="absolute inset-0 pointer-events-none">
                         {Array.from({ length: 20 }).map((_, i) => (
                             <div
@@ -53,21 +52,23 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
 
                 {/* Prize reveal */}
                 <div className="prize-reveal">
-                    <div className={`text-8xl mb-4 ${isWin ? 'animate-bounce' : ''}`}>
-                        {prizeInfo.emoji}
+                    <div className={`text-8xl mb-4 ${info.isWin ? 'animate-bounce' : ''}`}>
+                        {info.emoji}
                     </div>
 
-                    <h2 className={`text-2xl font-display font-bold mb-2 ${prizeInfo.color}`}>
-                        {isWin ? '🎊 ยินดีด้วย! 🎊' : 'เสียใจด้วยนะ 😢'}
+                    <h2 className={`text-2xl font-display font-bold mb-2 ${info.isWin ? 'text-pangdip-orange' : 'text-pangdip-brown'}`}>
+                        {info.isWin ? '🎊 ยินดีด้วย! 🎊' : info.name}
                     </h2>
 
-                    <p className="text-xl text-pangdip-brown font-body mb-4">
-                        {thaiPrizeNames[prize.result] || prize.prize_name}
-                    </p>
+                    {info.isWin && (
+                        <p className="text-xl text-pangdip-brown font-body mb-4">
+                            คุณได้รับ {info.name}
+                        </p>
+                    )}
 
-                    {isWin && (
+                    {info.message && (
                         <p className="text-sm text-pangdip-brown/70 mb-6 bg-pangdip-custard/50 p-3 rounded-lg">
-                            📸 กรุณาแคปหน้าจอนี้แสดงกับพนักงาน
+                            📸 {info.message}
                         </p>
                     )}
                 </div>
