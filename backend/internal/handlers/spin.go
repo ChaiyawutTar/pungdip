@@ -26,13 +26,7 @@ func (h *SpinHandler) Spin(c *fiber.Ctx) error {
 		})
 	}
 
-	if req.InstagramID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
-			Success: false,
-			Message: "Instagram ID is required",
-		})
-	}
-
+	// InstagramID is optional now
 	result, err := h.lottery.Spin(c.Context(), req.InstagramID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIResponse{

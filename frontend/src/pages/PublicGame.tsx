@@ -156,13 +156,13 @@ export const PublicGame = () => {
 
                         {/* Center circle */}
                         <div
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full shadow-lg z-10 flex items-center justify-center"
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full shadow-lg z-10 flex items-center justify-center overflow-hidden"
                             style={{
                                 background: '#F6E58D',
                                 border: '4px solid #4A2C2A',
                             }}
                         >
-                            <span className="text-2xl">🥟</span>
+                            <img src="/bread.png" alt="Pangdip" className="w-16 h-16 object-contain" />
                         </div>
                     </div>
                 </div>
