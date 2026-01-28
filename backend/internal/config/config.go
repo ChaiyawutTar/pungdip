@@ -38,8 +38,8 @@ func DefaultPrizes() []Prize {
 func Load() *Config {
 	return &Config{
 		ServerPort:  getEnv("SERVER_PORT", "8080"),
-		RedisAddr:   getEnv("REDIS_ADDR", "redis:6379"),
-		PostgresURL: getEnv("DATABASE_URL", "postgres://lottery:lottery123@postgres:5432/lottery?sslmode=disable"),
+		RedisAddr:   getEnv("REDIS_ADDR", "localhost:6379"),
+		PostgresURL: getEnv("DATABASE_URL", "postgres://lottery:lottery123@localhost:5438/lottery?sslmode=disable"),
 		AdminSecret: getEnv("ADMIN_SECRET", "admin_password"),
 		Prizes:      DefaultPrizes(),
 	}

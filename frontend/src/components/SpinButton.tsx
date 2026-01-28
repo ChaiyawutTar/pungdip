@@ -6,15 +6,15 @@ export const SpinButton = ({ onClick, isLoading, disabled }: SpinButtonProps) =>
             onClick={onClick}
             disabled={isLoading || disabled}
             className={`
-        btn-spin px-16 py-6 text-3xl
-        ${isLoading ? 'animate-pulse cursor-wait' : ''}
+        btn-spin px-12 py-5 text-2xl
+        ${isLoading ? 'cursor-wait' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}
         >
             {isLoading ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <svg
-                        className="animate-spin h-8 w-8"
+                        className="animate-spin h-6 w-6"
                         viewBox="0 0 24 24"
                         fill="none"
                     >
@@ -35,7 +35,7 @@ export const SpinButton = ({ onClick, isLoading, disabled }: SpinButtonProps) =>
                     <span>กำลังหมุน...</span>
                 </div>
             ) : (
-                <span className="tracking-wider">🎰 SPIN!</span>
+                <span className="tracking-wider">🎰 หมุนเลย!</span>
             )}
         </button>
     );

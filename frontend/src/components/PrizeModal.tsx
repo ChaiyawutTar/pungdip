@@ -18,6 +18,15 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
     const prizeInfo = PRIZE_DISPLAY[prize.result] || { emoji: '🎁', color: 'text-pangdip-orange' };
     const isWin = prize.result !== 'NOTHING';
 
+    // Thai prize names
+    const thaiPrizeNames: Record<string, string> = {
+        MK_DUCK: '🦆 บัตรเป็ด MK',
+        STARBUCKS: '☕ Starbucks 1,000 บาท',
+        DISCOUNT_10: '🎫 ส่วนลด 10%',
+        DISCOUNT_05: '🏷️ ส่วนลด 5%',
+        NOTHING: '😢 เสียใจด้วยนะ',
+    };
+
     return (
         <div className="modal-backdrop" onClick={onClose}>
             <div
@@ -44,21 +53,21 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
 
                 {/* Prize reveal */}
                 <div className="prize-reveal">
-                    <div className={`text-8xl mb-4 ${isWin ? 'animate-bounce-slow' : ''}`}>
+                    <div className={`text-8xl mb-4 ${isWin ? 'animate-bounce' : ''}`}>
                         {prizeInfo.emoji}
                     </div>
 
                     <h2 className={`text-2xl font-display font-bold mb-2 ${prizeInfo.color}`}>
-                        {isWin ? '🎊 ยินดีด้วย! 🎊' : 'เสียใจด้วย'}
+                        {isWin ? '🎊 ยินดีด้วย! 🎊' : 'เสียใจด้วยนะ 😢'}
                     </h2>
 
                     <p className="text-xl text-pangdip-brown font-body mb-4">
-                        {prize.prize_name}
+                        {thaiPrizeNames[prize.result] || prize.prize_name}
                     </p>
 
                     {isWin && (
-                        <p className="text-sm text-pangdip-brown/70 mb-6">
-                            กรุณาแสดงหน้าจอนี้กับพนักงาน
+                        <p className="text-sm text-pangdip-brown/70 mb-6 bg-pangdip-custard/50 p-3 rounded-lg">
+                            📸 กรุณาแคปหน้าจอนี้แสดงกับพนักงาน
                         </p>
                     )}
                 </div>

@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import { SpinButton } from '../components/SpinButton';
 import { PrizeModal } from '../components/PrizeModal';
-import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useSpin } from '../hooks/useSpin';
 import type { SpinResult } from '../types';
+
+// Prize wheel segments
+const WHEEL_SEGMENTS = [
+    { id: 'MK_DUCK', label: 'บัตร MK', color: '#FFD700', emoji: '🦆' },
+    { id: 'STARBUCKS', label: 'Starbucks', color: '#00704A', emoji: '☕' },
+    { id: 'DISCOUNT_10', label: 'ลด 10%', color: '#FF6B6B', emoji: '🎫' },
+    { id: 'DISCOUNT_05', label: 'ลด 5%', color: '#4ECDC4', emoji: '🏷️' },
+    { id: 'NOTHING', label: 'เสียใจด้วย', color: '#95A5A6', emoji: '😢' },
+    { id: 'NOTHING2', label: 'ลองใหม่', color: '#BDC3C7', emoji: '🍀' },
+];
 
 export const PublicGame = () => {
     const [igAccount, setIgAccount] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [prizeResult, setPrizeResult] = useState<SpinResult | null>(null);
+    const [wheelRotation, setWheelRotation] = useState(0);
+    const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
     const spinMutation = useSpin();
 
@@ -19,11 +30,31 @@ export const PublicGame = () => {
         }
 
         try {
+            // Start spinning animation
+            setIsWheelSpinning(true);
+
+            // Call API
             const result = await spinMutation.mutateAsync(igAccount.trim());
+
+            // Calculate target rotation based on result
+            const prizeIndex = WHEEL_SEGMENTS.findIndex(
+                p => result.result.startsWith(p.id.replace('2', ''))
+            );
+            const segmentAngle = 360 / WHEEL_SEGMENTS.length;
+            const targetAngle = 360 * 6 + (360 - (prizeIndex * segmentAngle + segmentAngle / 2));
+
+            setWheelRotation(prev => prev + targetAngle);
             setPrizeResult(result);
-            setShowModal(true);
+
+            // Show modal after wheel stops
+            setTimeout(() => {
+                setIsWheelSpinning(false);
+                setShowModal(true);
+            }, 4000);
+
         } catch (error) {
             console.error('Spin error:', error);
+            setIsWheelSpinning(false);
             alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
         }
     };
@@ -35,7 +66,7 @@ export const PublicGame = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 overflow-hidden">
             {/* Decorative elements */}
             <div className="absolute top-10 left-10 text-6xl animate-float opacity-50">🥟</div>
             <div className="absolute top-20 right-20 text-4xl animate-float opacity-40" style={{ animationDelay: '0.5s' }}>✨</div>
@@ -43,53 +74,122 @@ export const PublicGame = () => {
             <div className="absolute bottom-10 right-10 text-6xl animate-float opacity-50" style={{ animationDelay: '1.5s' }}>🥟</div>
 
             {/* Main container */}
-            <div className="card-warm p-8 md:p-12 max-w-lg w-full text-center relative z-10">
+            <div className="text-center relative z-10 w-full max-w-lg">
                 {/* Logo */}
-                <div className="mb-8">
-                    <h1 className="text-5xl md:text-6xl font-display font-bold text-pangdip-brown mb-2 animate-wiggle">
+                <div className="mb-6">
+                    <h1 className="text-5xl md:text-6xl font-display font-bold text-pangdip-brown mb-2">
                         🥟 PANGDIP 🥟
                     </h1>
                     <p className="text-pangdip-brown/70 font-body text-lg">
-                        Kasetsart Fair 2026
+                        งานเกษตรแฟร์ 2569
                     </p>
                 </div>
 
-                {spinMutation.isPending ? (
-                    <div className="py-12">
-                        <LoadingSpinner />
+                {/* Spinning Wheel */}
+                <div className="relative mb-6">
+                    {/* Pointer */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
+                        <div
+                            className="w-0 h-0"
+                            style={{
+                                borderLeft: '15px solid transparent',
+                                borderRight: '15px solid transparent',
+                                borderTop: '30px solid #4A2C2A',
+                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                            }}
+                        />
                     </div>
-                ) : (
-                    <>
-                        {/* IG Input */}
-                        <div className="mb-8">
-                            <label className="block text-pangdip-brown font-body text-left mb-2 ml-4">
-                                📱 Instagram Account
-                            </label>
-                            <input
-                                type="text"
-                                value={igAccount}
-                                onChange={(e) => setIgAccount(e.target.value)}
-                                placeholder="yourname"
-                                className="input-warm"
-                                onKeyDown={(e) => e.key === 'Enter' && handleSpin()}
-                            />
+
+                    {/* Wheel */}
+                    <div
+                        className="w-72 h-72 md:w-80 md:h-80 mx-auto rounded-full relative overflow-hidden shadow-2xl"
+                        style={{
+                            border: '8px solid #4A2C2A',
+                            transform: `rotate(${wheelRotation}deg)`,
+                            transition: isWheelSpinning ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none',
+                        }}
+                    >
+                        {/* Wheel segments using conic gradient */}
+                        <div
+                            className="w-full h-full"
+                            style={{
+                                background: `conic-gradient(
+                  ${WHEEL_SEGMENTS.map((seg, i) =>
+                                    `${seg.color} ${i * (100 / 6)}% ${(i + 1) * (100 / 6)}%`
+                                ).join(', ')}
+                )`,
+                            }}
+                        >
+                            {/* Labels */}
+                            {WHEEL_SEGMENTS.map((seg, i) => {
+                                const angle = (i * 60) + 30; // Center of each segment
+                                return (
+                                    <div
+                                        key={seg.id}
+                                        className="absolute text-white font-bold text-center"
+                                        style={{
+                                            top: '50%',
+                                            left: '50%',
+                                            width: '80px',
+                                            transform: `
+                        rotate(${angle}deg) 
+                        translateY(-110px) 
+                        rotate(90deg)
+                      `,
+                                            textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+                                            fontSize: '11px',
+                                        }}
+                                    >
+                                        <span className="text-xl">{seg.emoji}</span>
+                                        <br />
+                                        {seg.label}
+                                    </div>
+                                );
+                            })}
                         </div>
 
-                        {/* Spin Button */}
-                        <div className="flex justify-center">
-                            <SpinButton
-                                onClick={handleSpin}
-                                isLoading={spinMutation.isPending}
-                                disabled={!igAccount.trim()}
-                            />
+                        {/* Center circle */}
+                        <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full shadow-lg z-10 flex items-center justify-center"
+                            style={{
+                                background: '#F6E58D',
+                                border: '4px solid #4A2C2A',
+                            }}
+                        >
+                            <span className="text-2xl">🥟</span>
                         </div>
+                    </div>
+                </div>
 
-                        {/* Terms */}
-                        <p className="mt-6 text-sm text-pangdip-brown/50 font-body">
-                            กดหมุนเพื่อลุ้นรางวัลสุดพิเศษ! 🎉
-                        </p>
-                    </>
-                )}
+                {/* IG Input */}
+                <div className="card-warm p-6 mb-4">
+                    <label className="block text-pangdip-brown font-body text-left mb-2 ml-2">
+                        📱 Instagram Account
+                    </label>
+                    <input
+                        type="text"
+                        value={igAccount}
+                        onChange={(e) => setIgAccount(e.target.value)}
+                        placeholder="yourname"
+                        className="input-warm"
+                        disabled={isWheelSpinning}
+                        onKeyDown={(e) => e.key === 'Enter' && !isWheelSpinning && handleSpin()}
+                    />
+                </div>
+
+                {/* Spin Button */}
+                <div className="flex justify-center">
+                    <SpinButton
+                        onClick={handleSpin}
+                        isLoading={isWheelSpinning}
+                        disabled={!igAccount.trim() || isWheelSpinning}
+                    />
+                </div>
+
+                {/* Terms */}
+                <p className="mt-4 text-sm text-pangdip-brown/50 font-body">
+                    กรอก IG แล้วกดหมุนลุ้นรางวัล! 🎉
+                </p>
             </div>
 
             {/* Prize Modal */}
