@@ -24,14 +24,17 @@ type Config struct {
 }
 
 // DefaultPrizes returns the default prize configuration
+// Logic:
+// 1. IsTriggered=true: Can ONLY be won if Admin locks it (MK, Starbucks, Discounts)
+// 2. IsTriggered=false: Winnable by random spin (NOTHING, GIVE_IG)
 func DefaultPrizes() []Prize {
 	return []Prize{
 		{ID: "MK_DUCK", Name: "MK Duck Card", Stock: 5, Probability: 0, IsTriggered: true},
 		{ID: "STARBUCKS", Name: "Starbucks Gift Card", Stock: 1, Probability: 0, IsTriggered: true},
-		{ID: "DISCOUNT_10", Name: "10% Discount", Stock: -1, Probability: 15, IsTriggered: false},
-		{ID: "DISCOUNT_05", Name: "5% Discount", Stock: -1, Probability: 25, IsTriggered: false},
-		{ID: "NOTHING", Name: "Better Luck Next Time", Stock: -1, Probability: 40, IsTriggered: false},
-		{ID: "GIVE_IG", Name: "Give IG", Stock: -1, Probability: 20, IsTriggered: false},
+		{ID: "DISCOUNT_10", Name: "10% Discount", Stock: -1, Probability: 0, IsTriggered: true},
+		{ID: "DISCOUNT_05", Name: "5% Discount", Stock: -1, Probability: 0, IsTriggered: true},
+		{ID: "NOTHING", Name: "Better Luck Next Time", Stock: -1, Probability: 50, IsTriggered: false},
+		{ID: "GIVE_IG", Name: "Give IG", Stock: -1, Probability: 50, IsTriggered: false},
 	}
 }
 

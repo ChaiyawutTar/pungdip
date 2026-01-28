@@ -14,24 +14,39 @@ import type { Prize } from '../types';
 
 export const AdminPanel = () => {
     const queryClient = useQueryClient();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
     const [selectedPrize, setSelectedPrize] = useState<string>('MK_DUCK');
 
-    // Queries
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (password === 'm113') {
+            setIsAuthenticated(true);
+        } else {
+            alert('รหัสผ่านไม่ถูกต้อง');
+            setPassword('');
+        }
+    };
+
+    // Queries (only enabled if authenticated to save requests)
     const statusQuery = useQuery({
         queryKey: ['admin', 'status'],
         queryFn: getStatus,
-        refetchInterval: 3000, // Refresh every 3 seconds
+        refetchInterval: 3000,
+        enabled: isAuthenticated,
     });
 
     const logsQuery = useQuery({
         queryKey: ['admin', 'logs'],
         queryFn: () => getLogs(30),
-        refetchInterval: 5000, // Refresh every 5 seconds
+        refetchInterval: 5000,
+        enabled: isAuthenticated,
     });
 
     const prizesQuery = useQuery({
         queryKey: ['admin', 'prizes'],
         queryFn: getPrizes,
+        enabled: isAuthenticated,
     });
 
     // Mutations
@@ -60,7 +75,10 @@ export const AdminPanel = () => {
     const isLocked = statusQuery.data?.lock?.is_locked ?? false;
     const lockedPrizeId = statusQuery.data?.lock?.locked_prize_id ?? '';
     const stocks = statusQuery.data?.stocks ?? [];
-    const triggerablePrizes = prizesQuery.data?.filter((p: Prize) => p.is_triggered) ?? [];
+
+    // Show all prizes including "is_triggered" ones because we want to lock ANY prize
+    // Or filter as needed. User said "List prizes".
+    const triggerablePrizes = prizesQuery.data ?? [];
 
     // Update selected prize when lock status changes
     useEffect(() => {
@@ -84,15 +102,54 @@ export const AdminPanel = () => {
         }
     };
 
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+                <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
+                    <h1 className="text-2xl font-display font-bold text-center text-pangdip-brown mb-6">
+                        🔒 Admin Login
+                    </h1>
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter Password"
+                                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                         focus:border-pangdip-orange focus:outline-none text-center text-lg"
+                                autoFocus
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full bg-pangdip-orange text-white font-bold py-3 rounded-lg
+                                     hover:bg-orangered transition-colors shadow-lg"
+                        >
+                            Enter
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 p-4 md:p-8">
             <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-display font-bold text-pangdip-brown">
-                        🎛️ Admin Control Panel
-                    </h1>
-                    <p className="text-gray-600">Pangdip Lucky Draw - Staff Only</p>
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className="text-3xl font-display font-bold text-pangdip-brown">
+                            🎛️ Admin Control Panel
+                        </h1>
+                        <p className="text-gray-600">Pangdip Lucky Draw - Staff Only</p>
+                    </div>
+                    <button
+                        onClick={() => setIsAuthenticated(false)}
+                        className="text-sm text-red-500 hover:text-red-700 font-bold"
+                    >
+                        Logout
+                    </button>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -113,7 +170,7 @@ export const AdminPanel = () => {
                             {/* Prize Selector */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    เลือกรางวัลที่จะ Lock
+                                    เลือกรางวัลที่จะ Lock (คนถัดไปจะได้รางวัลนี้ 100%)
                                 </label>
                                 <select
                                     value={selectedPrize}

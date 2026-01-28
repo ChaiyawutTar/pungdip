@@ -6,7 +6,7 @@ export const SpinButton = ({ onClick, isLoading, disabled }: SpinButtonProps) =>
             onClick={onClick}
             disabled={isLoading || disabled}
             className={`
-        btn-spin px-12 py-5 text-2xl
+        btn-spin px-16 py-5 text-3xl
         ${isLoading ? 'cursor-wait' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}
@@ -32,10 +32,12 @@ export const SpinButton = ({ onClick, isLoading, disabled }: SpinButtonProps) =>
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                         />
                     </svg>
-                    <span>กำลังหมุน...</span>
+                    <span>...</span>
                 </div>
             ) : (
-                <span className="tracking-wider">🎰 หมุนเลย!</span>
+                <span className="tracking-widest font-bold text-sm"> {/* <-- เพิ่ม class ขนาดตรงนี้ */}
+                    SPIN
+                </span>
             )}
         </button>
     );

@@ -83,37 +83,15 @@ func (s *LotteryService) Spin(ctx context.Context, instagramID string) (*models.
 	}, nil
 }
 
-// randomPrize selects a random prize based on probability weights
+// randomPrize returns either NOTHING or GIVE_IG when no prize is locked
+// All other prizes require admin lock/trigger
 func (s *LotteryService) randomPrize() (string, string) {
-	// Calculate total weight (only non-triggered prizes)
-	var totalWeight int
-	for _, prize := range s.config.Prizes {
-		if !prize.IsTriggered {
-			totalWeight += prize.Probability
-		}
-	}
-
-	if totalWeight == 0 {
+	// Only 2 possible outcomes when not locked: NOTHING or GIVE_IG
+	// 50/50 chance
+	if s.rng.Intn(2) == 0 {
 		return "NOTHING", "Better Luck Next Time"
 	}
-
-	// Generate random number
-	roll := s.rng.Intn(totalWeight)
-
-	// Find the prize
-	var cumulative int
-	for _, prize := range s.config.Prizes {
-		if prize.IsTriggered {
-			continue
-		}
-		cumulative += prize.Probability
-		if roll < cumulative {
-			return prize.ID, prize.Name
-		}
-	}
-
-	// Fallback
-	return "NOTHING", "Better Luck Next Time"
+	return "GIVE_IG", "Give IG"
 }
 
 // getPrizeName returns the name for a prize ID
