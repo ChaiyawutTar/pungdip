@@ -4,14 +4,14 @@ import { PrizeModal } from '../components/PrizeModal';
 import { useSpin } from '../hooks/useSpin';
 import type { SpinResult } from '../types';
 
-// Prize wheel segments - 6 segments
+// Prize wheel segments - 6 segments (clockwise from top)
 const WHEEL_SEGMENTS = [
     { id: 'MK_DUCK', label: 'บัตรเป็ด MK', color: '#FFD700', emoji: '🦆' },
-    { id: 'STARBUCKS', label: 'Starbucks 1000฿', color: '#00704A', emoji: '☕' },
-    { id: 'DISCOUNT_10', label: 'ลด 10%', color: '#FF6B6B', emoji: '🎫' },
-    { id: 'DISCOUNT_05', label: 'ลด 5%', color: '#4ECDC4', emoji: '🏷️' },
-    { id: 'NOTHING', label: 'ไม่ได้อะไรเลย', color: '#95A5A6', emoji: '😢' },
+    { id: 'STARBUCKS', label: 'Starbucks', color: '#00704A', emoji: '☕' },
     { id: 'GIVE_IG', label: 'แจก IG', color: '#E1306C', emoji: '📱' },
+    { id: 'NOTHING', label: 'ไม่ได้อะไรเลย', color: '#95A5A6', emoji: '😢' },
+    { id: 'DISCOUNT_05', label: 'ลด 5%', color: '#4ECDC4', emoji: '🏷️' },
+    { id: 'DISCOUNT_10', label: 'ลด 10%', color: '#FF6B6B', emoji: '🎫' },
 ];
 
 export const PublicGame = () => {
@@ -26,20 +26,49 @@ export const PublicGame = () => {
         if (isWheelSpinning) return;
 
         try {
-            // Start spinning animation
             setIsWheelSpinning(true);
 
-            // Call API (pass empty string since IG not required)
+            // Call API
             const result = await spinMutation.mutateAsync('');
 
-            // Calculate target rotation based on result
-            const prizeIndex = WHEEL_SEGMENTS.findIndex(
-                p => result.result.startsWith(p.id.split('_')[0]) || result.result === p.id
-            );
-            const segmentAngle = 360 / WHEEL_SEGMENTS.length;
-            const targetAngle = 360 * 6 + (360 - (prizeIndex * segmentAngle + segmentAngle / 2));
+            console.log('API Result:', result.result);
 
-            setWheelRotation(prev => prev + targetAngle);
+            // Find the segment index that matches the result
+            const prizeIndex = WHEEL_SEGMENTS.findIndex(p => p.id === result.result);
+            console.log('Prize Index:', prizeIndex);
+
+            // Calculate rotation to land on this segment
+            // Each segment is 60 degrees
+            // We want the pointer (at top) to point to the center of the target segment
+            const segmentAngle = 360 / WHEEL_SEGMENTS.length; // 60 degrees
+
+            // The wheel rotates clockwise, so to land on segment N,
+            // we need to rotate so that segment N is at the top (where the pointer is)
+            // Segment 0 starts at 0 degrees (top-right in conic-gradient)
+            // Conic gradient starts at 3 o'clock and goes clockwise
+            // We need to offset by -90 to start at 12 o'clock (top)
+
+            // For segment at index i, its center is at angle: i * 60 + 30 degrees from 3 o'clock
+            // But conic gradient starts from 3 o'clock, so we need to adjust
+            // The pointer is at top (12 o'clock = -90 degrees from 3 o'clock)
+
+            // To make segment center point to top:
+            // Rotation needed = -(segment center angle from top)
+            // = -(i * 60 + 30 - 90) = 90 - i * 60 - 30 = 60 - i * 60
+            // = (1 - i) * 60
+
+            // Add multiple full rotations for animation
+            const baseRotation = (1 - prizeIndex) * segmentAngle;
+            const fullRotations = 360 * 6; // 6 full spins
+            const targetAngle = fullRotations + baseRotation;
+
+            // Reset and set new rotation
+            setWheelRotation(prev => {
+                // Normalize previous rotation to 0-360 range
+                const normalized = prev % 360;
+                return normalized + targetAngle;
+            });
+
             setPrizeResult(result);
 
             // Show modal after wheel stops
@@ -82,15 +111,15 @@ export const PublicGame = () => {
 
                 {/* Spinning Wheel - Centered */}
                 <div className="relative mb-8 flex justify-center">
-                    {/* Pointer */}
+                    {/* Pointer at top */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
                         <div
                             style={{
                                 width: 0,
                                 height: 0,
-                                borderLeft: '15px solid transparent',
-                                borderRight: '15px solid transparent',
-                                borderTop: '30px solid #4A2C2A',
+                                borderLeft: '18px solid transparent',
+                                borderRight: '18px solid transparent',
+                                borderTop: '35px solid #4A2C2A',
                                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
                             }}
                         />
@@ -105,53 +134,47 @@ export const PublicGame = () => {
                             transition: isWheelSpinning ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none',
                         }}
                     >
-                        {/* Wheel segments using conic gradient */}
+                        {/* Wheel segments - conic gradient starts at 3 o'clock, goes clockwise */}
+                        {/* Rotate container -90deg so first segment starts at top */}
                         <div
                             className="w-full h-full rounded-full"
                             style={{
-                                background: `conic-gradient(
+                                background: `conic-gradient(from -90deg,
                                     ${WHEEL_SEGMENTS.map((seg, i) =>
                                     `${seg.color} ${i * (100 / 6)}% ${(i + 1) * (100 / 6)}%`
                                 ).join(', ')}
                                 )`,
                             }}
                         >
-                            {/* Labels - using SVG for proper radial text */}
-                            <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full">
-                                {WHEEL_SEGMENTS.map((seg, i) => {
-                                    const angle = (i * 60) + 30; // Center of segment
-                                    const rad = (angle - 90) * (Math.PI / 180); // Convert to radians, offset to start from top
-                                    const radius = 110;
-                                    const x = 150 + Math.cos(rad) * radius;
-                                    const y = 150 + Math.sin(rad) * radius;
+                            {/* Labels */}
+                            {WHEEL_SEGMENTS.map((seg, i) => {
+                                // Each segment is 60 degrees
+                                // First segment center is at 30 degrees from top (clockwise)
+                                const angle = i * 60 + 30;
+                                const rad = (angle) * (Math.PI / 180);
+                                const radius = 100;
+                                const x = Math.sin(rad) * radius; // sin for x because we start from top
+                                const y = -Math.cos(rad) * radius; // -cos for y because Y is inverted
 
-                                    return (
-                                        <g key={seg.id} transform={`rotate(${angle}, ${x}, ${y})`}>
-                                            <text
-                                                x={x}
-                                                y={y - 10}
-                                                textAnchor="middle"
-                                                fill="white"
-                                                fontSize="24"
-                                                style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
-                                            >
-                                                {seg.emoji}
-                                            </text>
-                                            <text
-                                                x={x}
-                                                y={y + 12}
-                                                textAnchor="middle"
-                                                fill="white"
-                                                fontSize="11"
-                                                fontWeight="bold"
-                                                style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
-                                            >
-                                                {seg.label}
-                                            </text>
-                                        </g>
-                                    );
-                                })}
-                            </svg>
+                                return (
+                                    <div
+                                        key={seg.id}
+                                        className="absolute font-bold text-center"
+                                        style={{
+                                            left: '50%',
+                                            top: '50%',
+                                            transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${angle}deg)`,
+                                            color: 'white',
+                                            textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                                            fontSize: '11px',
+                                            lineHeight: '1.2',
+                                        }}
+                                    >
+                                        <div className="text-2xl mb-1">{seg.emoji}</div>
+                                        <div className="whitespace-nowrap">{seg.label}</div>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {/* Center circle */}
