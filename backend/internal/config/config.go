@@ -33,6 +33,7 @@ func DefaultPrizes() []Prize {
 		{ID: "STARBUCKS", Name: "Starbucks Gift Card", Stock: 1, Probability: 0, IsTriggered: true},
 		{ID: "DISCOUNT_10", Name: "10% Discount", Stock: -1, Probability: 0, IsTriggered: true},
 		{ID: "DISCOUNT_05", Name: "5% Discount", Stock: -1, Probability: 0, IsTriggered: true},
+		{ID: "FREE_FOOD", Name: "กินฟรี", Stock: -1, Probability: 0, IsTriggered: true},
 		{ID: "NOTHING", Name: "Better Luck Next Time", Stock: -1, Probability: 50, IsTriggered: false},
 		{ID: "GIVE_IG", Name: "Give IG", Stock: -1, Probability: 50, IsTriggered: false},
 	}

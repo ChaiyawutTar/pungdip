@@ -8,9 +8,10 @@ import type { SpinResult } from '../types';
 // Prize wheel segments - Must match backend order!
 const WHEEL_SEGMENTS = [
     { id: 'MK_DUCK', label: 'บัตรเป็ด MK', color: '#FFD700', emoji: '🦆' },
-    { id: 'STARBUCKS', label: 'Starbucks', color: '#00704A', emoji: '☕' },
+    { id: 'STARBUCKS', label: 'Starbucks 1000฿', color: '#00704A', emoji: '☕' },
     { id: 'DISCOUNT_10', label: 'ลด 10%', color: '#FF6B6B', emoji: '🎫' },
     { id: 'DISCOUNT_05', label: 'ลด 5%', color: '#4ECDC4', emoji: '🏷️' },
+    { id: 'FREE_FOOD', label: 'กินฟรี', color: '#FF9500', emoji: '🍜' },
     { id: 'NOTHING', label: 'เสียใจด้วย', color: '#95A5A6', emoji: '😢' },
     { id: 'GIVE_IG', label: 'แจก IG', color: '#E1306C', emoji: '📱' },
 ];
@@ -78,7 +79,7 @@ export const PublicGame = () => {
             <div className="text-center relative z-10 w-full max-w-lg flex flex-col items-center">
                 <div className="mb-12">
                     <h1 className="text-5xl md:text-6xl font-display font-bold text-pangdip-brown mb-2">
-                        🥟 PANGDIP 🥟
+                       🍞 PANGDIP 🍞
                     </h1>
                     <p className="text-pangdip-brown/70 font-body text-lg">
                         งานเกษตรแฟร์ 2569
