@@ -77,3 +77,32 @@ npm run dev
 - `POST /api/admin/unlock` - Clear lock
 - `POST /api/admin/reset` - Reset all stocks
 - `GET /api/admin/logs` - View recent activity
+
+## ☁️ Deployment Guide
+
+### Environment Variables
+
+**Backend (Go) - Deploy on Render/Koyeb**:
+| Variable | Value Example | Description |
+|----------|---------------|-------------|
+| `PORT` | `8080` | Server listening port |
+| `REDIS_ADDR` | `redis://user:pass@host:port` | Full connection string for Redis |
+| `DATABASE_URL`| `postgres://user:pass@host:port/dbname` | Full connection string for PostgreSQL |
+| `ADMIN_SECRET`| `m113` | (Optional) For future use |
+
+**Frontend (React) - Deploy on Cloudflare Pages/Koyeb Static**:
+| Variable | Value Example | Description |
+|----------|---------------|-------------|
+| `VITE_API_URL`| `https://your-backend.onrender.com` | URL of your deployed backend |
+
+### Configuration for Koyeb (Monorepo)
+
+**Backend App**:
+- **Workdir**: `backend`
+- **Builder**: Dockerfile
+- **Location**: `backend/Dockerfile`
+
+**Frontend App**:
+- **Workdir**: `frontend`
+- **Builder**: N/A (Build Command: `npm run build`)
+- **Output Directory**: `dist`

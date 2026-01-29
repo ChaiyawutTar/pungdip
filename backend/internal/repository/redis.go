@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/ChaiyawutTar/pungdip/backend/internal/config"
 	"github.com/redis/go-redis/v9"
@@ -23,11 +24,25 @@ type RedisRepository struct {
 
 // NewRedisRepository creates a new Redis repository
 func NewRedisRepository(addr string, cfg *config.Config) (*RedisRepository, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: "",
-		DB:       0,
-	})
+	var opts *redis.Options
+	var err error
+
+	// Support Render's Redis URL format (redis://...)
+	if strings.HasPrefix(addr, "redis://") || strings.HasPrefix(addr, "rediss://") {
+		opts, err = redis.ParseURL(addr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid redis url: %w", err)
+		}
+	} else {
+		// Fallback to simple host:port
+		opts = &redis.Options{
+			Addr:     addr,
+			Password: "", // No password for local
+			DB:       0,
+		}
+	}
+
+	client := redis.NewClient(opts)
 
 	// Test connection
 	ctx := context.Background()
