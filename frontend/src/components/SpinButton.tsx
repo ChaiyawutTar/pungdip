@@ -6,39 +6,14 @@ export const SpinButton = ({ onClick, isLoading, disabled }: SpinButtonProps) =>
             onClick={onClick}
             disabled={isLoading || disabled}
             className={`
-        btn-spin px-16 py-5 text-3xl
+        btn-spin px-16 py-5 text-2xl rounded-full
         ${isLoading ? 'cursor-wait' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}
         >
-            {isLoading ? (
-                <div className="flex items-center gap-3">
-                    <svg
-                        className="animate-spin h-6 w-6"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                    >
-                        <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                        />
-                        <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
-                    </svg>
-                    <span>...</span>
-                </div>
-            ) : (
-                <span className="tracking-widest font-bold text-sm"> {/* <-- เพิ่ม class ขนาดตรงนี้ */}
-                    SPIN
-                </span>
-            )}
+            <span className="tracking-widest font-bold">
+                SPIN
+            </span>
         </button>
     );
 };

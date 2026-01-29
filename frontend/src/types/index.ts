@@ -89,5 +89,6 @@ export const PRIZE_DISPLAY: Record<string, { emoji: string; color: string }> = {
     STARBUCKS: { emoji: '☕', color: 'text-green-600' },
     DISCOUNT_10: { emoji: '🎫', color: 'text-orange-500' },
     DISCOUNT_05: { emoji: '🏷️', color: 'text-blue-500' },
+    GIVE_IG: { emoji: '📱', color: 'text-pink-500' },
     NOTHING: { emoji: '😢', color: 'text-gray-500' },
 };

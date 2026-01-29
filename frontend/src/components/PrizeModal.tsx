@@ -29,7 +29,7 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
     return (
         <div className="modal-backdrop" onClick={onClose}>
             <div
-                className="card-warm p-8 max-w-md mx-4 text-center relative overflow-hidden"
+                className="card-warm p-16 max-w-xl mx-4 text-center relative overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Confetti effect */}
@@ -52,11 +52,11 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
 
                 {/* Prize reveal */}
                 <div className="prize-reveal">
-                    <div className={`text-8xl mb-4 ${info.isWin ? 'animate-bounce' : ''}`}>
+                    <div className={`text-9xl mb-6 ${info.isWin ? 'animate-bounce' : ''}`}>
                         {info.emoji}
                     </div>
 
-                    <h2 className={`text-2xl font-display font-bold mb-2 ${info.isWin ? 'text-pangdip-orange' : 'text-pangdip-brown'}`}>
+                    <h2 className={`text-3xl font-display font-bold mb-4 ${info.isWin ? 'text-pangdip-orange' : 'text-pangdip-brown'}`}>
                         {info.isWin ? '🎊 ยินดีด้วย! 🎊' : info.name}
                     </h2>
 
@@ -67,7 +67,7 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
                     )}
 
                     {info.message && (
-                        <p className="text-sm text-pangdip-brown/70 mb-6 bg-pangdip-custard/50 p-3 rounded-lg">
+                        <p className="text-lg text-pangdip-brown/70 mb-8 bg-pangdip-custard/50 p-5 rounded-xl">
                             📸 {info.message}
                         </p>
                     )}
@@ -75,7 +75,7 @@ export const PrizeModal = ({ isOpen, onClose, prize }: PrizeModalProps) => {
 
                 <button
                     onClick={onClose}
-                    className="btn-spin px-8 py-3 text-lg"
+                    className="btn-spin px-16 py-5 text-2xl rounded-full"
                 >
                     ปิด
                 </button>
