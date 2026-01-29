@@ -41,7 +41,7 @@ func DefaultPrizes() []Prize {
 // Load loads configuration from environment variables
 func Load() *Config {
 	return &Config{
-		ServerPort:  getEnv("SERVER_PORT", "8080"),
+		ServerPort:  getEnvWithFallback("PORT", "SERVER_PORT", "8000"),
 		RedisAddr:   getEnv("REDIS_ADDR", "localhost:6379"),
 		PostgresURL: getEnv("DATABASE_URL", "postgres://lottery:lottery123@localhost:5438/lottery?sslmode=disable"),
 		AdminSecret: getEnv("ADMIN_SECRET", "admin_password"),
@@ -51,6 +51,17 @@ func Load() *Config {
 
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+// getEnvWithFallback checks primary key first, then fallback key, then default
+func getEnvWithFallback(primary, fallback, defaultValue string) string {
+	if value := os.Getenv(primary); value != "" {
+		return value
+	}
+	if value := os.Getenv(fallback); value != "" {
 		return value
 	}
 	return defaultValue
