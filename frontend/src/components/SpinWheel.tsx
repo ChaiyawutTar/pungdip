@@ -100,26 +100,47 @@ export const SpinWheel = ({ onSpin, isSpinning, result, disabled }: SpinWheelPro
     const radius = 140;
     const innerRadius = 35;
 
-    // Find the target angle for a result
-    const getResultRotation = (resultId: string) => {
+    // Find the rotation needed to land on the result
+    const getResultRotation = (resultId: string, currentRotation: number) => {
         // Use exact match only
         const prize = PRIZES_WITH_ANGLES.find((p) => p.id === resultId);
-        if (!prize) return 360 * 5;
+        if (!prize) {
+            console.warn(`Prize not found: ${resultId}`);
+            return 360 * 5;
+        }
 
         // Target the middle of the prize section
         const targetAngle = (prize.startAngle + prize.endAngle) / 2;
-        // Pointer is at right side (90 degrees from top in standard coordinates)
-        // We need to rotate the wheel so that the target section's middle aligns with the pointer
-        // Since the wheel starts with 0 at top, and sections are drawn clockwise from top,
-        // we need to rotate by: (360 - targetAngle + 90) to bring the target to the right
-        const rotationNeeded = 360 - targetAngle + 90;
-        return 360 * 5 + rotationNeeded;
+
+        // The pointer is at 90 degrees (right side) from the top
+        // We need to find the absolute wheel position that puts targetAngle at 90°
+        // When wheel is at 0°, section at angle A appears at position A
+        // When wheel rotates by R°, section at angle A appears at position (A + R) mod 360
+        // We want: (targetAngle + R) mod 360 = 90
+        // So R = 90 - targetAngle (mod 360)
+        const absoluteTargetPosition = (90 - targetAngle + 360) % 360;
+
+        // Current wheel position (normalized to 0-360)
+        const currentPosition = ((currentRotation % 360) + 360) % 360;
+
+        // Calculate how much more we need to rotate from current position
+        let additionalRotation = (absoluteTargetPosition - currentPosition + 360) % 360;
+
+        // Ensure we rotate at least a small amount (avoid landing immediately)
+        if (additionalRotation < 30) {
+            additionalRotation += 360;
+        }
+
+        // Add 5 full spins for visual effect
+        return 360 * 5 + additionalRotation;
     };
 
     useEffect(() => {
         if (isSpinning && result && !spinningRef.current) {
             spinningRef.current = true;
-            const targetRotation = rotation + getResultRotation(result);
+            const additionalRotation = getResultRotation(result, rotation);
+            const targetRotation = rotation + additionalRotation;
+            console.log(`Spinning to ${result}: current=${rotation}, additional=${additionalRotation}, target=${targetRotation}`);
             setRotation(targetRotation);
             setHasSpun(true);
 
