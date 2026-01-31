@@ -16,10 +16,10 @@ interface SpinWheelProps {
 
 const PRIZES: Prize[] = [
     { id: 'NOTHING', label: 'เสียใจด้วย', color: '#95A5A6', percentage: 30 },
-    { id: 'IG_GIVEAWAY', label: 'แจก IG', color: '#E91E63', percentage: 30 },
+    { id: 'GIVE_IG', label: 'แจก IG', color: '#E91E63', percentage: 30 },
     { id: 'DISCOUNT_05', label: 'ลด 5%', color: '#4ECDC4', percentage: 20 },
     { id: 'DISCOUNT_10', label: 'ลด 10%', color: '#FF6B6B', percentage: 10 },
-    { id: 'FREE_MEAL', label: 'กินฟรี', color: '#FF9800', percentage: 5 },
+    { id: 'FREE_FOOD', label: 'กินฟรี', color: '#FF9800', percentage: 5 },
     { id: 'MK_DUCK', label: 'บัตร MK', color: '#FFD700', percentage: 3 },
     { id: 'STARBUCKS', label: 'Starbucks 1000฿', color: '#00704A', percentage: 2 },
 ];
@@ -102,9 +102,8 @@ export const SpinWheel = ({ onSpin, isSpinning, result, disabled }: SpinWheelPro
 
     // Find the target angle for a result
     const getResultRotation = (resultId: string) => {
-        const prize = PRIZES_WITH_ANGLES.find(
-            (p) => p.id === resultId || p.id.startsWith(resultId.split('_')[0])
-        );
+        // Use exact match only
+        const prize = PRIZES_WITH_ANGLES.find((p) => p.id === resultId);
         if (!prize) return 360 * 5;
 
         // Target the middle of the prize section
