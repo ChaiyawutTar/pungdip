@@ -109,8 +109,12 @@ export const SpinWheel = ({ onSpin, isSpinning, result, disabled }: SpinWheelPro
 
         // Target the middle of the prize section
         const targetAngle = (prize.startAngle + prize.endAngle) / 2;
-        // Spin multiple times + land with pointer at right (90 degrees from top)
-        return 360 * 5 + (90 - targetAngle);
+        // Pointer is at right side (90 degrees from top in standard coordinates)
+        // We need to rotate the wheel so that the target section's middle aligns with the pointer
+        // Since the wheel starts with 0 at top, and sections are drawn clockwise from top,
+        // we need to rotate by: (360 - targetAngle + 90) to bring the target to the right
+        const rotationNeeded = 360 - targetAngle + 90;
+        return 360 * 5 + rotationNeeded;
     };
 
     useEffect(() => {
